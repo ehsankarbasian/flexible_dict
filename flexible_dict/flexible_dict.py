@@ -1,43 +1,70 @@
+from typing import Any, Iterable
 
-class _SubscriptableDefault(object):
+from .abstract import AbstractFlexible
+
+
+class _SubscriptableDefault(AbstractFlexible):
     NOT_DETERMINED = '__NOT_DETEMINED__'
     
-    def __init__(self, default=None, next_level_default=NOT_DETERMINED, iterable_default=[]):
-        self.value = default
+    def __init__(self,
+                 default: Any = None,
+                 next_level_default: Any = NOT_DETERMINED,
+                 iterable_default: Iterable | None = None):
+        if iterable_default == None:
+            iterable_default = []
+        
+        self._value = default
         self.__next_level_default = next_level_default
         self.__iterable_default = iterable_default
     
     def __getitem__(self, __key):
         next_level_default_determined = bool(self.__next_level_default != self.NOT_DETERMINED)
         if next_level_default_determined:
-            return _SubscriptableDefault(default=self.__next_level_default, iterable_default=self.__iterable_default)
+            return _SubscriptableDefault(default=self.__next_level_default,
+                                         iterable_default=self.__iterable_default)
         else:
-            return _SubscriptableDefault(default=self.value, iterable_default=self.__iterable_default)
+            return _SubscriptableDefault(default=self._value,
+                                         iterable_default=self.__iterable_default)
     
-    def __is_iterable(self):
+    def _is_iterable(self):
         try:
-            iter(self.value)
+            iter(self._value)
             return True
         except TypeError:
             return False
     
     @property
+    def value(self):
+        return self._value
+    
+    @value.setter
+    def value(self, val):
+        self._value=val
+    
+    @property
     def iterable_value(self):
-        if self.__is_iterable():
-            return self.value
+        if self._is_iterable():
+            return self._value
         return self.__iterable_default
     
     @property
     def flexible_value(self):
-        return _SubscriptableDefault(default=self.value, iterable_default=self.__iterable_default)
+        return _SubscriptableDefault(default=self._value, iterable_default=self.__iterable_default)
     
     def __str__(self):
-        return f'\nType: {type(self)} \nValue: {self.value}\n'
+        return f'\nType: {type(self)} \nValue: {self._value}\n'
 
 
-class FlexibleDict(dict):
+class FlexibleDict(AbstractFlexible, dict):
     
-    def __init__(self, input_dict, default=None, iterable_default=[], *args, **kwargs):
+    def __init__(self,
+                 input_dict: dict,
+                 default: Any = None,
+                 iterable_default: Iterable | None = None,
+                 *args, **kwargs):
+        if iterable_default == None:
+            iterable_default = []
+        
         iter(iterable_default)
         dict.__init__(self, *args, **kwargs)
         self.__value = self
@@ -59,7 +86,8 @@ class FlexibleDict(dict):
     
     def __getitem__(self, __key):
         if __key not in self.keys():
-            self.__value = _SubscriptableDefault(default=self.__default, iterable_default=self.__iterable_default)
+            self.__value = _SubscriptableDefault(default=self.__default,
+                                                 iterable_default=self.__iterable_default)
         else:
             inline_value = super(FlexibleDict, self).__getitem__(__key)
             self.__value = self.__generate_flexible_value(inline_value)
@@ -73,12 +101,16 @@ class FlexibleDict(dict):
         if is_inline_value_flexible_dict or is_inline_value_subscriptable_default:
             flexible_value = inline_value
         elif is_inline_value_dict:
-            flexible_value = FlexibleDict(input_dict=inline_value, default=self.__default, iterable_default=self.__iterable_default)
+            flexible_value = FlexibleDict(input_dict=inline_value,
+                                          default=self.__default,
+                                          iterable_default=self.__iterable_default)
         else:
-            flexible_value = _SubscriptableDefault(default=inline_value, next_level_default=self.__default, iterable_default=self.__iterable_default)
+            flexible_value = _SubscriptableDefault(default=inline_value, 
+                                                   next_level_default=self.__default,
+                                                   iterable_default=self.__iterable_default)
         return flexible_value
     
-    def __is_iterable(self):
+    def _is_iterable(self):
         try:
             iter(self.__value)
             return True
@@ -89,9 +121,11 @@ class FlexibleDict(dict):
     def value(self):
         return dict(self.__value)
     
+    # TODO: Create __value setter and test it too
+    
     @property
     def iterable_value(self):
-        if self.__is_iterable():
+        if self._is_iterable():
             return dict(self.__value)
         return self.__iterable_default
     
