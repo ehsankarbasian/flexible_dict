@@ -1,58 +1,7 @@
 from typing import Any, Iterable
 
 from .abstract import AbstractFlexible
-
-
-class _SubscriptableDefault(AbstractFlexible):
-    NOT_DETERMINED = '__NOT_DETEMINED__'
-    
-    def __init__(self,
-                 default: Any = None,
-                 next_level_default: Any = NOT_DETERMINED,
-                 iterable_default: Iterable | None = None):
-        if iterable_default == None:
-            iterable_default = []
-        
-        self._value = default
-        self.__next_level_default = next_level_default
-        self.__iterable_default = iterable_default
-    
-    def __getitem__(self, __key):
-        next_level_default_determined = bool(self.__next_level_default != self.NOT_DETERMINED)
-        if next_level_default_determined:
-            return _SubscriptableDefault(default=self.__next_level_default,
-                                         iterable_default=self.__iterable_default)
-        else:
-            return _SubscriptableDefault(default=self._value,
-                                         iterable_default=self.__iterable_default)
-    
-    def _is_iterable(self):
-        try:
-            iter(self._value)
-            return True
-        except TypeError:
-            return False
-    
-    @property
-    def value(self):
-        return self._value
-    
-    @value.setter
-    def value(self, val):
-        self._value=val
-    
-    @property
-    def iterable_value(self):
-        if self._is_iterable():
-            return self._value
-        return self.__iterable_default
-    
-    @property
-    def flexible_value(self):
-        return _SubscriptableDefault(default=self._value, iterable_default=self.__iterable_default)
-    
-    def __str__(self):
-        return f'\nType: {type(self)} \nValue: {self._value}\n'
+from .chained_default import ChainedDefault
 
 
 class FlexibleDict(AbstractFlexible, dict):
@@ -86,8 +35,8 @@ class FlexibleDict(AbstractFlexible, dict):
     
     def __getitem__(self, __key):
         if __key not in self.keys():
-            self.__value = _SubscriptableDefault(default=self.__default,
-                                                 iterable_default=self.__iterable_default)
+            self.__value = ChainedDefault(default=self.__default,
+                                          iterable_default=self.__iterable_default)
         else:
             inline_value = super(FlexibleDict, self).__getitem__(__key)
             self.__value = self.__generate_flexible_value(inline_value)
@@ -96,7 +45,7 @@ class FlexibleDict(AbstractFlexible, dict):
     def __generate_flexible_value(self, inline_value):
         is_inline_value_dict = isinstance(inline_value, dict)
         is_inline_value_flexible_dict = isinstance(inline_value, FlexibleDict)
-        is_inline_value_subscriptable_default = isinstance(inline_value, _SubscriptableDefault)
+        is_inline_value_subscriptable_default = isinstance(inline_value, ChainedDefault)
         
         if is_inline_value_flexible_dict or is_inline_value_subscriptable_default:
             flexible_value = inline_value
@@ -105,9 +54,9 @@ class FlexibleDict(AbstractFlexible, dict):
                                           default=self.__default,
                                           iterable_default=self.__iterable_default)
         else:
-            flexible_value = _SubscriptableDefault(default=inline_value, 
-                                                   next_level_default=self.__default,
-                                                   iterable_default=self.__iterable_default)
+            flexible_value = ChainedDefault(default=inline_value, 
+                                            next_level_default=self.__default,
+                                            iterable_default=self.__iterable_default)
         return flexible_value
     
     def _is_iterable(self):

@@ -1,7 +1,8 @@
 from unittest import TestCase
 import unittest
 
-from flexible_dict.flexible_dict import FlexibleDict, _SubscriptableDefault
+from flexible_dict.chained_default import ChainedDefault
+from flexible_dict.flexible_dict import FlexibleDict
 
 
 INITIAL_DICT = {'a': 'a',
@@ -136,14 +137,14 @@ class FlexibleDictStructureTestCase(TestCase):
     
     def test_inner_value_is_flexible(self):
         self.assertIsInstance(self.flexible_dict['cdefg']['defg'], FlexibleDict)
-        self.assertIsInstance(self.flexible_dict['cdefg']['c'], _SubscriptableDefault)
+        self.assertIsInstance(self.flexible_dict['cdefg']['c'], ChainedDefault)
     
     def test_inner_value_is_not_flexible_after_dotvalue(self):
         self.assertNotIsInstance(self.flexible_dict['cdefg'].value['defg'], FlexibleDict)
-        self.assertNotIsInstance(self.flexible_dict['cdefg'].value['c'], _SubscriptableDefault)
+        self.assertNotIsInstance(self.flexible_dict['cdefg'].value['c'], ChainedDefault)
     
     def test_flexible_value_type(self):
-        self.assertIsInstance(self.flexible_dict['a'].flexible_value, _SubscriptableDefault)
+        self.assertIsInstance(self.flexible_dict['a'].flexible_value, ChainedDefault)
         self.assertIsInstance(self.flexible_dict['cdefg'].flexible_value, FlexibleDict)
     
     def test_iterable_value_type_level_1(self):
@@ -156,8 +157,8 @@ class FlexibleDictStructureTestCase(TestCase):
         self.assertIsInstance(self.flexible_dict['cdefg']['c'].iterable_value, str)
     
     def test_flexible_value_type_level_1(self):
-        self.assertIsInstance(self.flexible_dict['a'].flexible_value, _SubscriptableDefault)
-        self.assertIsInstance(self.flexible_dict['c'].flexible_value, _SubscriptableDefault)
+        self.assertIsInstance(self.flexible_dict['a'].flexible_value, ChainedDefault)
+        self.assertIsInstance(self.flexible_dict['c'].flexible_value, ChainedDefault)
         self.assertNotIsInstance(self.flexible_dict['a'].flexible_value, str)
         self.assertNotIsInstance(self.flexible_dict['c'].flexible_value, int)
         
@@ -165,21 +166,21 @@ class FlexibleDictStructureTestCase(TestCase):
         self.assertIsInstance(self.flexible_dict['cdefg'].flexible_value, FlexibleDict)
     
     def test_flexible_value_type_level_mpre(self):
-        self.assertIsInstance(self.flexible_dict['cdefg']['c'].flexible_value, _SubscriptableDefault)
-        self.assertIsInstance(self.flexible_dict['cdefg']['defg']['d'].flexible_value, _SubscriptableDefault)
-        self.assertIsInstance(self.flexible_dict['cdefg']['defg']['efg']['fg']['f'].flexible_value, _SubscriptableDefault)
+        self.assertIsInstance(self.flexible_dict['cdefg']['c'].flexible_value, ChainedDefault)
+        self.assertIsInstance(self.flexible_dict['cdefg']['defg']['d'].flexible_value, ChainedDefault)
+        self.assertIsInstance(self.flexible_dict['cdefg']['defg']['efg']['fg']['f'].flexible_value, ChainedDefault)
     
     def test_flexible_value_type_level_more_than_exists(self):
-        self.assertIsInstance(self.flexible_dict['cdefg']['defg']['efg']['fg']['f']['tt'].flexible_value, _SubscriptableDefault)
+        self.assertIsInstance(self.flexible_dict['cdefg']['defg']['efg']['fg']['f']['tt'].flexible_value, ChainedDefault)
     
     def test_flexible_value_type_chained(self):
         self.assertIsInstance(self.flexible_dict['cdefg'].flexible_value, FlexibleDict)
         self.assertIsInstance(self.flexible_dict['cdefg'].flexible_value.flexible_value, FlexibleDict)
         self.assertIsInstance(self.flexible_dict['cdefg'].flexible_value.flexible_value.flexible_value, FlexibleDict)
         
-        self.assertIsInstance(self.flexible_dict['cdefg']['c'].flexible_value, _SubscriptableDefault)
-        self.assertIsInstance(self.flexible_dict['cdefg']['c'].flexible_value.flexible_value, _SubscriptableDefault)
-        self.assertIsInstance(self.flexible_dict['cdefg']['c'].flexible_value.flexible_value.flexible_value, _SubscriptableDefault)
+        self.assertIsInstance(self.flexible_dict['cdefg']['c'].flexible_value, ChainedDefault)
+        self.assertIsInstance(self.flexible_dict['cdefg']['c'].flexible_value.flexible_value, ChainedDefault)
+        self.assertIsInstance(self.flexible_dict['cdefg']['c'].flexible_value.flexible_value.flexible_value, ChainedDefault)
     
     def test_flexible_value_chained_iterable_value_type(self):
         self.assertIsInstance(self.flexible_dict['cdefg'].flexible_value.iterable_value, dict)
@@ -196,7 +197,7 @@ class FlexibleDictStructureTestCase(TestCase):
         self.assertIsInstance(self.flexible_dict['cdefg']['c'].flexible_value.flexible_value.flexible_value.iterable_value, str)
     
     def test_chained_flexible_value_type(self):
-        self.assertIsInstance(self.flexible_dict['a'].flexible_value.flexible_value, _SubscriptableDefault)
+        self.assertIsInstance(self.flexible_dict['a'].flexible_value.flexible_value, ChainedDefault)
         self.assertIsInstance(self.flexible_dict['cdefg'].flexible_value.flexible_value, FlexibleDict)
     
     def test_flexible_value_chain(self):
@@ -223,22 +224,22 @@ class FlexibleDictStructureTestCase(TestCase):
         
         self.assertIsInstance(self.flexible_dict['cdefg'].value, dict)
         self.assertNotIsInstance(self.flexible_dict['cdefg'].value, FlexibleDict)
-        self.assertNotIsInstance(self.flexible_dict['cdefg'].value, _SubscriptableDefault)
+        self.assertNotIsInstance(self.flexible_dict['cdefg'].value, ChainedDefault)
         
         self.assertIsInstance(self.flexible_dict['cdefg'].flexible_value.value, dict)
         self.assertNotIsInstance(self.flexible_dict['cdefg'].flexible_value.value, FlexibleDict)
-        self.assertNotIsInstance(self.flexible_dict['cdefg'].flexible_value.value, _SubscriptableDefault)
+        self.assertNotIsInstance(self.flexible_dict['cdefg'].flexible_value.value, ChainedDefault)
         
-        self.assertIsInstance(self.flexible_dict['cdefg']['f'], _SubscriptableDefault)
+        self.assertIsInstance(self.flexible_dict['cdefg']['f'], ChainedDefault)
         self.assertIsInstance(self.flexible_dict['cdefg']['f'].value, str)
-        self.assertNotIsInstance(self.flexible_dict['cdefg']['f'].value, _SubscriptableDefault)
+        self.assertNotIsInstance(self.flexible_dict['cdefg']['f'].value, ChainedDefault)
         self.assertIsInstance(self.flexible_dict['cdefg']['f'].flexible_value.value, str)
     
     def test_flexible_value_type_after_setitem(self):
         self.flexible_dict['cdefg'] = {'f': 'f_val', 'g': 'g_val'}
         self.assertIsInstance(self.flexible_dict['cdefg'].flexible_value, FlexibleDict)
-        self.assertIsInstance(self.flexible_dict['cdefg']['f'].flexible_value, _SubscriptableDefault)
-        self.assertIsInstance(self.flexible_dict['cdefg']['f']['n'].flexible_value, _SubscriptableDefault)
+        self.assertIsInstance(self.flexible_dict['cdefg']['f'].flexible_value, ChainedDefault)
+        self.assertIsInstance(self.flexible_dict['cdefg']['f']['n'].flexible_value, ChainedDefault)
     
     def test_item_setted_after_setitem_level_1(self):
         item = {'f': 'f_val', 'g': 'g_val'}
@@ -251,7 +252,7 @@ class FlexibleDictStructureTestCase(TestCase):
         item = {'f': 'f_val', 'g': 'g_val'}
         self.flexible_dict['cdefg'] = item
         self.flexible_dict['cdefg']['f'] = 'new'
-        self.assertIsInstance(self.flexible_dict['cdefg']['f'], _SubscriptableDefault)
+        self.assertIsInstance(self.flexible_dict['cdefg']['f'], ChainedDefault)
         self.assertEqual(self.flexible_dict['cdefg']['f'].value, 'new')
         self.assertEqual(self.flexible_dict['cdefg']['f'].flexible_value.value, 'new')
         self.assertEqual(self.flexible_dict['cdefg']['g'].value, 'g_val')
