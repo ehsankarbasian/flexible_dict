@@ -1,7 +1,7 @@
 from unittest import TestCase
 import unittest
 
-from flexible_dict import FlexibleDict, _SubscriptableDefault
+from flexible_dict.flexible_dict import FlexibleDict, _SubscriptableDefault
 
 
 INITIAL_DICT = {'a': 'a',

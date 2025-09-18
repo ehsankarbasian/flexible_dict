@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="deepflex-dict",
-    version="1.0.2",
+    version="1.0.3",
     author="Ehsan Karbasian",
     author_email="ehsan.karbasian@gmail.com",
     description="A dictionary with flexible options",

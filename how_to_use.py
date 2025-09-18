@@ -16,7 +16,9 @@ a = {'a': 'a',
          },
      }
 
-b = FlexibleDict(input_dict=a, default='__MY_NONE__', iterable_default='__MY_ITERABLE_DEFAULT__')
+b = FlexibleDict(input_dict=a,
+                 default='__MY_NONE__',
+                 iterable_default='__MY_ITERABLE_DEFAULT__')
 print(b['a'].value == 'a')
 print(b['b'].value == 'b')
 print(b['cdefg']['c'].value == 'c')
